@@ -1,0 +1,12 @@
+variables:
+  APPLICATION_NAME: personen
+  APPLICATION_URL: '??.s15m.nl'
+  NAMESPACE: ??
+
+ont:deploy:
+  image: harbor-gn2.cicd.s15m.nl/docker-hub-proxy/alpine/helm:latest
+  stage: deploy
+  environment:
+    name: overheid-test4
+  script:
+    - helm upgrade --debug --install ${APPLICATION_NAME} -f ./values.yaml ./deployment/ --namespace=${NAMESPACE}

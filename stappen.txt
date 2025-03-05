@@ -1,0 +1,8 @@
+install helm cli
+-> helm create {applicatie naam}
+-> values yml updaten
+-> helm install {application-name} ./{application-folder}
+
+
+install minikube en daarna:
+-> minikube addons enable ingress
