@@ -1,0 +1,20 @@
+stages:
+  - deploy
+  - undeploy
+
+deploy:
+  image: harbor-gn2.cicd.s15m.nl/docker-hub-proxy/alpine/helm:latest
+  stage: deploy
+  environment:
+    name: overheid-test4
+  script:
+    - helm upgrade --install --debug bewoningen ./ --namespace=bzk-mev-ont
+
+undeploy:
+  image: harbor-gn2.cicd.s15m.nl/docker-hub-proxy/alpine/helm:latest
+  stage: undeploy
+  when: manual
+  environment:
+    name: overheid-test4
+  script:
+    - helm uninstall --debug bewoningen --namespace=bzk-mev-ont

@@ -1,0 +1,23 @@
+[08:30:17 Error] Microsoft.AspNetCore.Server.Kestrel
+Connection id "0HNB7H4NS9894", Request id "0HNB7H4NS9894:00000001": An unhandled exception was thrown by the application.
+System.UnauthorizedAccessException: Access to the path '/app/keys' is denied.
+ ---> System.IO.IOException: Permission denied
+   --- End of inner exception stack trace ---
+   at System.IO.FileSystem.CreateDirectory(String fullPath, UnixFileMode unixCreateMode)
+   at System.IO.DirectoryInfo.Create()
+   at Duende.IdentityServer.Services.KeyManagement.FileSystemKeyStore.LoadKeysAsync() in /_/src/IdentityServer/Services/Default/KeyManagement/FileSystemKeyStore.cs:line 58
+   at Duende.IdentityServer.Services.KeyManagement.KeyManager.GetAllKeysFromStoreAsync(Boolean cache) in /_/src/IdentityServer/Services/Default/KeyManagement/KeyManager.cs:line 428
+   at Duende.IdentityServer.Services.KeyManagement.KeyManager.GetAllKeysInternalAsync() in /_/src/IdentityServer/Services/Default/KeyManagement/KeyManager.cs:line 109
+   at Duende.IdentityServer.Services.KeyManagement.KeyManager.GetAllKeysAsync() in /_/src/IdentityServer/Services/Default/KeyManagement/KeyManager.cs:line 96
+   at Duende.IdentityServer.Services.KeyManagement.AutomaticKeyManagerKeyStore.GetValidationKeysAsync() in /_/src/IdentityServer/Services/Default/KeyManagement/AutomaticKeyManagerKeyStore.cs:line 105
+   at Duende.IdentityServer.Services.DefaultKeyMaterialService.GetValidationKeysAsync() in /_/src/IdentityServer/Services/Default/DefaultKeyMaterialService.cs:line 112
+   at Duende.IdentityServer.ResponseHandling.DiscoveryResponseGenerator.CreateDiscoveryDocumentAsync(String baseUrl, String issuerUri) in /_/src/IdentityServer/ResponseHandling/Default/DiscoveryResponseGenerator.cs:line 110
+   at Duende.IdentityServer.Endpoints.DiscoveryEndpoint.ProcessAsync(HttpContext context) in /_/src/IdentityServer/Endpoints/DiscoveryEndpoint.cs:line 66
+   at Duende.IdentityServer.Hosting.IdentityServerMiddleware.Invoke(HttpContext context, IdentityServerOptions options, IEndpointRouter router, IUserSession userSession, IEventService events, IIssuerNameService issuerNameService, ISessionCoordinationService sessionCoordinationService) in /_/src/IdentityServer/Hosting/IdentityServerMiddleware.cs:line 109
+   at Duende.IdentityServer.Hosting.IdentityServerMiddleware.Invoke(HttpContext context, IdentityServerOptions options, IEndpointRouter router, IUserSession userSession, IEventService events, IIssuerNameService issuerNameService, ISessionCoordinationService sessionCoordinationService) in /_/src/IdentityServer/Hosting/IdentityServerMiddleware.cs:line 131
+   at Duende.IdentityServer.Hosting.MutualTlsEndpointMiddleware.Invoke(HttpContext context, IAuthenticationSchemeProvider schemes) in /_/src/IdentityServer/Hosting/MutualTlsEndpointMiddleware.cs:line 95
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Duende.IdentityServer.Hosting.DynamicProviders.DynamicSchemeAuthenticationMiddleware.Invoke(HttpContext context) in /_/src/IdentityServer/Hosting/DynamicProviders/DynamicSchemes/DynamicSchemeAuthenticationMiddleware.cs:line 51
+   at Duende.IdentityServer.Hosting.BaseUrlMiddleware.Invoke(HttpContext context) in /_/src/IdentityServer/Hosting/BaseUrlMiddleware.cs:line 27
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpProtocol.ProcessRequests[TContext](IHttpApplication`1 application)
