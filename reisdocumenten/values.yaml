@@ -5,20 +5,10 @@
 replicaCount: 1
 
 image:
-  pullPolicy: IfNotPresent
-
-auth: 
-  name: autorisatie-protocollering
   repository: ghcr.io/brp-api/brp-autorisatie-protocollering
-  tag: 1.8.0-latest 
-
-informatie:
-  name: informatie-service
-  repository: ghcr.io/brp-api/reisdocumenten-informatie-service
-
-data:
-  name: data-service
-  repository: ghcr.io/brp-api/reisdocumenten-data-service
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag:
 
 imagePullSecrets: []
 nameOverride: ""
@@ -26,7 +16,7 @@ fullnameOverride: ""
 
 serviceAccount:
   # Specifies whether a service account should be created
-  create: true
+  create: false
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.
@@ -48,26 +38,21 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  targetPort: 4444
-  port: 4444
-
-serviceAuth:
-  port: 4488
-serviceInformatie:
-  port: 4448
-serviceData:
   port: 4444
 
 ingress:
   enabled: true
   ingressClassName: "nginx"
-  annotations: 
-      kubernetes.io/tls-acme: "true"
+  annotations:
+     kubernetes.io/ingress.allow-http: \"true\"
   hosts:
-    - host: localhost
+    - host: reisdocumenten.bzk-mev-ont.test4.s15m.nl
       paths:
         - path: /
           pathType: ImplementationSpecific
+          backend:
+            serviceName: reisdocumenten
+            servicePort: 4444
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
@@ -97,3 +82,127 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+volumes:
+  - name: logging
+
+# de volume is extra, de logging wordt naar de out/err geschreven maar als de container vastloopt wordt de out/err stream leeg gemaakt
+# door de volume als backup te hebben kan er dan toch nog gedebugged worden, zo is het probleem met ASPNETCORE_URLS ook naar voren gekomen 
+volumeMounts:
+  - name: logging
+    mountPath: /mnt/logging
+    readOnly: false
+
+podTemplateLabels:
+  tier: zeer-vertrouwd
+  ingress-controller-frontoffice-policy: allow
+  egress-frontoffice-policy: allow
+
+env:
+  - name: ASPNETCORE_ENVIRONMENT
+    value: Release
+  - name: ASPNETCORE_HTTP_PORTS
+    value: "4444"
+  # dit is nodig omdat er anders een permission denied optreed bij het binden van de socket
+  - name: ASPNETCORE_URLS
+    value: http://+:4444
+  - name: OAuth__Authority
+    value: http://identityserver.bzk-mev-ont.test4.s15m.nl
+  - name: Db__Host
+    value: database.bzk-mev-ont.svc:5432
+  - name: Db__Username
+    value: root
+  - name: Db__Password
+    value: root
+  - name: Db__Database
+    value: rvig_haalcentraal_testdata
+  - name: HealthEndpointBase
+    value: /brp-authorisatie/health
+  - name: FeatureManagement__gebruikMeestRecenteAutorisatie
+    value: "false"
+  - name: Ecs__Path
+    value: /mnt/logging/brp-autorisatie.json
+  - name: Ecs__SecuredPath
+    value: "/mnt/logging/brp-autorisatie-secured.json"
+  # onderstaande kan ook met een ocelot.Release.json document in een persisted volume opgelost worden dat is makkelijk in beheer 
+  - name: Routes__0__UpstreamPathTemplate
+    value: /haalcentraal/api/reisdocumenten/reisdocumenten
+  - name: Routes__0__DownstreamPathTemplate
+    value: /haalcentraal/api/reisdocumenten/reisdocumenten
+  - name: Routes__0__DownstreamScheme
+    value: http
+  - name: Routes__0__DownstreamHostAndPorts__0__Host
+    value: localhost
+  - name: Routes__0__DownstreamHostAndPorts__0__Port
+    value: "5555"
+
+sidecarInformatie:
+  name: reisdocumenten-informatie-service
+  repository: ghcr.io/brp-api/reisdocumenten-informatie-service
+  tag: 2.0.4-latest
+  port: 5555
+  volumeMounts:
+  - name: logging
+    mountPath: /mnt/logging
+    readOnly: false
+  env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: Release
+    - name: ASPNETCORE_HTTP_PORTS
+      value: "5555"
+    # dit is nodig omdat er anders een permission denied optreed bij het binden van de socket
+    - name: ASPNETCORE_URLS
+      value: http://+:5555
+    - name: Ecs__Path
+      value: /mnt/logging/brp-reisdocumenten-informatie.json
+    - name: Ecs__SecuredPath
+      value: /mnt/logging/brp-reisdocumenten-informatie-secured.json
+    # onderstaande kan ook met een ocelot.Release.json document in een persisted volume opgelost worden dat is makkelijk in beheer 
+    - name: Routes__0__UpstreamPathTemplate
+      value: /haalcentraal/api/reisdocumenten/reisdocumenten
+    - name: Routes__0__DownstreamPathTemplate
+      value: /haalcentraal/api/reisdocumenten/reisdocumenten
+    - name: Routes__0__DownstreamScheme
+      value: http
+    - name: Routes__0__DownstreamHostAndPorts__0__Host
+      value: localhost
+    - name: Routes__0__DownstreamHostAndPorts__0__Port
+      value: "6666"
+
+sidecarData:
+  name: reisdocumenten-data-service
+  repository: ghcr.io/brp-api/reisdocumenten-data-service
+  tag: 2.0.12-latest
+  port: 6666
+  volumeMounts:
+  - name: logging
+    mountPath: /mnt/logging
+    readOnly: false
+  env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: Release
+    - name: ASPNETCORE_HTTP_PORTS
+      value: "6666"
+    # dit is nodig omdat er anders een permission denied optreed bij het binden van de socket
+    - name: ASPNETCORE_URLS
+      value: http://+:6666
+    - name: Database__Host
+      value: database.bzk-mev-ont.svc
+    - name: Database__Port
+      value: "5432"
+    - name: Database__Username
+      value: root
+    - name: Database__Password
+      value: root
+    - name: Database__Database
+      value: rvig_haalcentraal_testdata
+    - name: Ecs__Path
+      value: /mnt/logging/brp-reisdocumenten-data.json
+    - name: Ecs__SecuredPath
+      value: "/mnt/logging/brp-reisdocumenten-data-secured.json"
+    # moet naar true maar dit is even om te testen
+    - name: ProtocolleringAuthorization__UseProtocollering
+      value: "false"
+    # moet naar true maar dit is even om te testen
+    - name: ProtocolleringAuthorization__UseAuthorizationChecks
+      value: "false"

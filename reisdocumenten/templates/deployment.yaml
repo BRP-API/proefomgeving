@@ -18,6 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
+        {{- toYaml .Values.podTemplateLabels | nindent 8 }}
         {{- include "reisdocumenten.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
@@ -28,63 +29,53 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}{{ printf "-" }}{{ .Values.auth.name }}
+        - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.auth.repository }}:{{ .Values.auth.tag  | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            {{- toYaml .Values.volumeMounts | nindent 12 }}
+          env:
+            {{- toYaml .Values.env | nindent 12 }}
           ports:
             - name: http
-              containerPort: {{ .Values.serviceAuth.port }}
+              containerPort: {{ .Values.service.port }}
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-        - name: {{ .Chart.Name }}{{ printf "-" }}{{ .Values.informatie.name }}
+        - name: {{ .Values.sidecarInformatie.name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.informatie.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.sidecarInformatie.repository }}:{{ .Values.sidecarInformatie.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            {{- toYaml .Values.sidecarInformatie.volumeMounts | nindent 12 }}
+          env:
+            {{- toYaml .Values.sidecarInformatie.env | nindent 12 }}
           ports:
             - name: http
-              containerPort: {{ .Values.serviceInformatie.port }}
+              containerPort: {{ .Values.sidecarInformatie.port }}
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-        - name: {{ .Chart.Name }}{{ printf "-" }}{{ .Values.data.name }}
+        - name: {{ .Values.sidecarData.name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.data.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.sidecarData.repository }}:{{ .Values.sidecarData.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            {{- toYaml .Values.sidecarData.volumeMounts | nindent 12 }}
+          env:
+            {{- toYaml .Values.sidecarData.env | nindent 12 }}
           ports:
             - name: http
-              containerPort: {{ .Values.serviceData.port }}
+              containerPort: {{ .Values.sidecarData.port }}
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        {{- toYaml .Values.volumes | nindent 8 }} 
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

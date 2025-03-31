@@ -8,7 +8,7 @@ deploy:
   environment:
     name: overheid-test4
   script:
-    - helm upgrade --install --debug personen ./ --namespace=bzk-mev-ont
+    - helm upgrade --install --debug reisdocumenten ./ --namespace=bzk-mev-ont
 
 undeploy:
   image: harbor-gn2.cicd.s15m.nl/docker-hub-proxy/alpine/helm:latest
@@ -17,4 +17,4 @@ undeploy:
   environment:
     name: overheid-test4
   script:
-    - helm uninstall --debug personen --namespace=bzk-mev-ont
+    - helm uninstall --debug reisdocumenten --namespace=bzk-mev-ont

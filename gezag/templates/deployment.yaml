@@ -18,6 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
+        {{- toYaml .Values.podTemplateLabels | nindent 8 }}
         {{- include "gezag.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
@@ -34,26 +35,11 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: test
-            - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://localhost:5432/rvig_brp_api_testdata
-            - name: SPRING_DATASOURCE_USERNAME
-              value: postgres
-            - name: SPRING_DATASOURCE_PASSWORD
-              value: postgres
+            {{- toYaml .Values.env | nindent 12 }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

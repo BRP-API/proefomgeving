@@ -16,7 +16,7 @@ fullnameOverride: ""
 
 serviceAccount:
   # Specifies whether a service account should be created
-  create: true
+  create: false
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.
@@ -43,31 +43,33 @@ service:
 
 ingress:
   enabled: true
-  className: ""
   ingressClassName: "nginx"
-  annotations: 
-      kubernetes.io/tls-acme: "true"
+  annotations:
+     kubernetes.io/ingress.allow-http: \"true\"
   hosts:
-    - host: localhost
+    - host: gezag.bzk-mev-ont.test4.s15m.nl
       paths:
         - path: /
           pathType: ImplementationSpecific
+          backend:
+            serviceName: gezag
+            servicePort: 8080
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
 
-resources: {}
+resources: 
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 900Mi
 
 autoscaling:
   enabled: false
@@ -81,3 +83,18 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+env:
+  - name: SPRING_PROFILES_ACTIVE
+    value: test
+  - name: SPRING_DATASOURCE_URL
+    value: jdbc:postgresql://database.bzk-mev-ont.svc:5432/rvig_haalcentraal_testdata
+  - name: SPRING_DATASOURCE_USERNAME
+    value: root
+  - name: SPRING_DATASOURCE_PASSWORD
+    value: root
+
+podTemplateLabels:
+  tier: zeer-vertrouwd
+  ingress-controller-frontoffice-policy: allow
+  egress-frontoffice-policy: allow

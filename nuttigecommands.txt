@@ -1,0 +1,41 @@
+
+# toon alle helm installaties
+* helm list
+
+# Voor services
+* toon alle service: `kubectl get service`
+* beschrijf een service: `kubectl describe {servicenaam}`
+* geef logs (voeg arg -f toe voor volgen): `kubectl logs {servicenaam}`
+
+# Voor ingress
+* toon alle ingress: `kubectl get ingress` 
+* beschrijf een ingress: `kubectl describe ingres/{ingressnaam}`
+
+# Voor deployment
+* toon alle deployment: `kubectl get deployment`
+* beschrijf een deployment: `kubectl describe deployment/{deploymentnaam}`
+* geef logs (voeg arg -f toe voor volgen): `kubectl logs deployment/{deploymentnaam}`
+* geef logs (voeg arg -f toe voor volgen) voor alle containers: `kubectl logs deployment/{deploymentnaam} --all-containers=true`
+
+# Voor pods
+* toon alle pods: `kubectl get pods` 
+* beschrijf een pod: `kubectl describe pod/{podnaam}`
+* geef logs (voeg arg -f toe voor volgen): `kubectl logs pod/{podnaam}`
+* logs voor multicontainer pods, alle logs: `kubectl logs pod/{podnaam} --all-containers=true`
+* logs voor multicontainer pods, specifieke container (container naam zie describe) logs: `kubectl logs pod/{podnaam} -c {containernaam}`
+
+# Voor shell in de pod (nodig voor volume te breiken)
+`kubectl exec -it pod/{podnaam} sh`
+
+# Voor shell naar een container in een pod met meerdere containers (nodig voor volume te breiken)
+`kubectl exec -it pod/{podnaam} -c {containernaam} sh`
+
+# Lezen logging uit volume
+eerst exec zoals hier boven daarna`
+1. `cd ~/mnt/logging`
+2. `cat {logbestandsnaam}`
+OF `tail -f {logbestandsnaam}`
+
+# Verbinden met database
+Zet een port-forward naar de pod op met: `kubectl port-forward {podnaam} 5432:5432`
+
